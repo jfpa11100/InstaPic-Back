@@ -1,19 +1,29 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
+import * as bcryptjs from 'bcryptjs'
+import { LoginUserDto } from './dto/login-user.dto';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UserService {
-
-  constructor(@InjectRepository(User) private readonly userRepository: Repository<User>){}
-
+  
+  constructor(@InjectRepository(User) private readonly userRepository: Repository<User>,
+              private jwtService: JwtService){}
+  
+  
   async create(createUserDto: CreateUserDto) {
     try {
-      const newUser = this.userRepository.create(createUserDto)
-      return await this.userRepository.save(newUser);
+      const { password, ...newUser } = createUserDto
+      const userDb = this.userRepository.create({
+        password: bcryptjs.hashSync(password),
+        ...newUser
+      })
+      const { password:_, ...userAdded } = await this.userRepository.save(userDb)
+      return userAdded
     } catch (error) {
       console.error(error)
       if(error.code === '23505'){
@@ -21,6 +31,27 @@ export class UserService {
       }
       throw new InternalServerErrorException(error)
     }
+  }
+  
+  async login(loginUser: LoginUserDto) {
+    const { username, password } = loginUser
+    const user = await this.userRepository.find({ where:{ username } })
+    if (user.length===0 || this.notValidUser(user[0], password)) {
+      throw new ForbiddenException(`Not valid credentials`)
+    }
+    // if (user.length===0 || !bcryptjs.compareSync(password, user[0].password)) {
+    //   throw new ForbiddenException(`Not valid credentials`)
+    // }
+    return {
+      name: user[0].name,
+      photo: user[0].photo,
+      username: user[0].username,
+      token: this.jwtService.sign({ username:user[0].username, id:user[0].id })
+    }
+  }
+
+  private notValidUser(user:User, password:string):boolean{
+    return !bcryptjs.compareSync(password, user.password)
   }
 
   async findAll() {
