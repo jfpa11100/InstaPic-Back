@@ -36,12 +36,10 @@ export class UserService {
   async login(loginUser: LoginUserDto) {
     const { username, password } = loginUser
     const user = await this.userRepository.find({ where:{ username } })
+
     if (user.length===0 || this.notValidUser(user[0], password)) {
       throw new ForbiddenException(`Not valid credentials`)
     }
-    // if (user.length===0 || !bcryptjs.compareSync(password, user[0].password)) {
-    //   throw new ForbiddenException(`Not valid credentials`)
-    // }
     return {
       name: user[0].name,
       photo: user[0].photo,
