@@ -27,7 +27,7 @@ export class UserService {
     } catch (error) {
       console.error(error)
       if(error.code === '23505'){
-        throw new BadRequestException(error.detail)
+        throw new BadRequestException('Usuario ya existe')
       }
       throw new InternalServerErrorException(error)
     }
