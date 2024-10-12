@@ -1,6 +1,4 @@
 import { Module } from '@nestjs/common';
-import { PostsController } from './posts/posts.controller';
-import { PostsService } from './posts/post.service';
 import { UserModule } from './user/user.module';
 import { PostsModule } from './posts/posts.module';
 import { ConfigModule } from '@nestjs/config';
@@ -22,7 +20,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     PostsModule,
     UserModule,
   ],
-  controllers: [PostsController],
-  providers: [PostsService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

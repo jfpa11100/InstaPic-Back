@@ -2,14 +2,20 @@ import { Module } from "@nestjs/common";
 import { Post } from "./entities/post-entity";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { CommentEntity } from "./entities/comment-entity";
+import { User } from "src/user/entities/user.entity";
+import { PostsController } from "./posts.controller";
+import { PostsService } from "./post.service";
 
 @Module({
-    controllers:[],
-    providers:[],
     imports:[
-        TypeOrmModule.forFeature([Post, CommentEntity]),
+        TypeOrmModule.forFeature([
+            User,
+            Post,
+            CommentEntity
+          ]),
     ],
-})
-export class PostsModule{
+    controllers:[PostsController],
+    providers:[PostsService]
 
-}
+})
+export class PostsModule{}
