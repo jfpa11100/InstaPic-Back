@@ -5,10 +5,12 @@ import {
   Body,
   Param,
   Delete,
+  Patch,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('user')
 export class UserController {
@@ -23,6 +25,7 @@ export class UserController {
   login(@Body() loginUserDto: LoginUserDto) {
     return this.userService.login(loginUserDto);
   }
+  
 
   @Get()
   findAll() {
@@ -33,11 +36,17 @@ export class UserController {
   findOne(@Param('id') id: string) {
     return this.userService.findOne(id);
   }
+  
+  @Patch()
+  update(@Body() updateUserDto: UpdateUserDto) {
+    return this.userService.update(updateUserDto);
+  }
 
   // @Patch(':id')
   // update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
   //   return this.userService.update(id, updateUserDto);
   // }
+  
 
   @Delete(':id')
   remove(@Param('id') id: string) {

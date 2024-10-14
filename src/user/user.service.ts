@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { LoginUserDto } from './dto/login-user.dto';
 import * as bcryptjs from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -39,15 +40,26 @@ export class UserService {
     }
   }
 
+  async update(updateUserDto: UpdateUserDto){
+    try {
+      await this.userRepository.update({username:updateUserDto.username}, updateUserDto);
+      return updateUserDto
+    } catch(error){
+      console.log(error);
+      throw new BadRequestException('No se pudo actualizar el usuario')
+    }
+  }
+
   async login(loginUserDto:LoginUserDto){
     const { username, password } = loginUserDto;
     const user = await this.userRepository.findOneBy({username});
     if(!user || this.isNotValid(password, user.password)){
-      throw new UnauthorizedException('Not valid credentials');
+      throw new UnauthorizedException('Credenciales inválidas');
     }
     return {
       username:user.username,
       name:user.name,
+      photo: user.photo,
       token:this.getToken(user)
     };
   }
