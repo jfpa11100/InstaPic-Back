@@ -10,9 +10,11 @@ export class PostsController {
 
   constructor(private readonly postsService:PostsService){}
 
+  @UseGuards(AuthGuard)
   @Get()
-  findAll(){
-    return this.postsService.findAll();
+  findAll(@Body() body){
+    const userId = body['userId'];
+    return this.postsService.findAll(userId);
   }
 
   @Get(':id')
@@ -35,7 +37,7 @@ export class PostsController {
   }
 
   @UseGuards(AuthGuard)
-  @Post('add/comment')
+  @Post('comment')
   createComment(@Req() req){
     const request:CreateCommentDto = req.body;
     return this.postsService.createComment(request);

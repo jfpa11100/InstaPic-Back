@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { Post } from './entities/post-entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/user/entities/user.entity';
@@ -21,8 +21,11 @@ export class PostsService {
 
   posts = [];
 
-  findAll() {
-    return this.posts;
+  findAll(userId: string) {
+    return this.postRepository.find({
+      where: { user: { id: userId } },
+      relations:['comments']
+    });
   }
 
   findById(id: string) {
@@ -40,13 +43,14 @@ export class PostsService {
 
   async createComment(request: CreateCommentDto) {
     try {
-      const post = await this.postRepository.findOneBy({ id: request.postId });
       const newComment = this.commentRepository.create({
         comment: request.comment,
-        post
+        post: { id: request.postId },
+        user: { id: request.userId }
       });
-      await this.commentRepository.save(newComment);
-      return await this.findByUserId(request.userId);
+
+      return await this.commentRepository.save(newComment);
+
     } catch (error) {
       console.log(error)
       throw new BadRequestException();
