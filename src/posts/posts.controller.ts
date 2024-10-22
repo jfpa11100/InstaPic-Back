@@ -38,9 +38,8 @@ export class PostsController {
 
   @UseGuards(AuthGuard)
   @Post('comment')
-  createComment(@Req() req){
-    const request:CreateCommentDto = req.body;
-    return this.postsService.createComment(request);
+  createComment(@Body() createComment:CreateCommentDto){
+    return this.postsService.createComment(createComment);
   }
 
   @Put(':id')

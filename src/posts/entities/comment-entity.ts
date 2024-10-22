@@ -12,7 +12,12 @@ export class CommentEntity{
     })
     comment: string;
 
-    @ManyToOne(() => Post, post => post.comments)
+    @ManyToOne(() => Post, post => post.comments,
+        {
+            onDelete: "CASCADE",
+            // cascade:true
+        }
+    )
     post: Post
 
     @ManyToOne(() => User, user => user.comments)

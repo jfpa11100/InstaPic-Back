@@ -13,7 +13,7 @@ export class Post{
     @ManyToOne(() => User, user => user.posts)
     user: User
 
-    @OneToMany(() => CommentEntity, comment => comment.post, { cascade: true })
+    @OneToMany(() => CommentEntity, comment => comment.post)
     comments: CommentEntity[]
 
 }

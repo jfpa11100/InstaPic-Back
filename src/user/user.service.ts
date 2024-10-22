@@ -42,8 +42,17 @@ export class UserService {
 
   async update(updateUserDto: UpdateUserDto){
     try {
-      await this.userRepository.update({username:updateUserDto.username}, updateUserDto);
-      return updateUserDto
+      const { userId, ...user } = updateUserDto
+      await this.userRepository.update({ id:userId }, user);
+      return this.userRepository.findOne({
+        where: { id:userId },
+        select:{
+          name:true,
+          username:true,
+          email:true,
+          photo:true
+        }
+      })
     } catch(error){
       console.log(error);
       throw new BadRequestException('No se pudo actualizar el usuario')
