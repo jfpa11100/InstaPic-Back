@@ -1,10 +1,10 @@
 import { User } from "src/user/entities/user.entity";
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
 import { CommentEntity } from "./comment-entity";
 
 @Entity('posts')
 export class Post{
-    @PrimaryGeneratedColumn('uuid')
+    @PrimaryColumn('uuid')
     id:string;
 
     @Column({ type:'varchar' })

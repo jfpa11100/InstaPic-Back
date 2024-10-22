@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { ILike, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Post } from './entities/post-entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/user/entities/user.entity';
@@ -62,6 +62,7 @@ export class PostsService {
     try {
       const user = await this.userRepository.findOneBy({ id: createPost.userId });
       const post = this.postRepository.create({
+        id: createPost.id,
         url: createPost.url,
         user
       });

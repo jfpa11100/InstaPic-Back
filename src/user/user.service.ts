@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
@@ -10,42 +15,46 @@ import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
-
-
   constructor(
     @InjectRepository(User)
-    private readonly userRepository:Repository<User>,
-    private jwtService: JwtService
-  ){}
+    private readonly userRepository: Repository<User>,
+    private jwtService: JwtService,
+  ) {}
 
   async create(createUserDto: CreateUserDto) {
-    try{
+    try {
       const { password, ...user } = createUserDto;
       const newUser = this.userRepository.create({
         password: bcryptjs.hashSync(password),
-        ...user
+        ...user,
       });
-      const { password:_, ...created} = await this.userRepository.save(newUser);
+      const { password: _, ...created } =
+        await this.userRepository.save(newUser);
       return {
-        username:created.username,
-        name:created.name,
-        token:this.getToken({password, ...created})
+        username: created.username,
+        name: created.name,
+        token: this.getToken({ password, ...created }),
       };
-    }catch(error){
+    } catch (error) {
       console.log(error);
-      if(error.code='23505'){
-        throw new BadRequestException(`${createUserDto.username} ya existe!!`)
+      if ((error.code = '23505')) {
+        throw new BadRequestException(`${createUserDto.username} ya existe!!`);
       }
-      throw new InternalServerErrorException('Algo salió mal!!')
+      throw new InternalServerErrorException('Algo salió mal!!');
     }
   }
 
-  async update(updateUserDto: UpdateUserDto){
+  async update(updateUserDto: UpdateUserDto) {
     try {
-      const { userId, ...user } = updateUserDto
-      await this.userRepository.update({ id:userId }, user);
+      updateUserDto.password = bcryptjs.hashSync(updateUserDto.password) 
+      const { userId, ...user } = updateUserDto;
+      await this.userRepository
+        .update({ id: userId }, user)
+        .then((response) => {
+          if (!response.affected) console.log("User couldn't be updated");
+        });
       return this.userRepository.findOne({
-        where: { id:userId },
+        where: { id: userId },
         select:{
           name:true,
           username:true,
@@ -53,53 +62,52 @@ export class UserService {
           photo:true
         }
       })
-    } catch(error){
+    } catch (error) {
       console.log(error);
-      throw new BadRequestException('No se pudo actualizar el usuario')
+      throw new BadRequestException('No se pudo actualizar el usuario');
     }
   }
 
-  async login(loginUserDto:LoginUserDto){
+  async login(loginUserDto: LoginUserDto) {
     const { username, password } = loginUserDto;
-    const user = await this.userRepository.findOneBy({username});
-    if(!user || this.isNotValid(password, user.password)){
+    const user = await this.userRepository.findOneBy({ username });
+    if (!user || this.isNotValid(password, user.password)) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
     return {
-      username:user.username,
-      name:user.name,
+      username: user.username,
+      name: user.name,
       photo: user.photo,
-      token:this.getToken(user)
+      token: this.getToken(user),
     };
   }
 
   async findAll() {
     const users = await this.userRepository.find();
-    return users.map(item=>{
+    return users.map((item) => {
       const { password, ...user } = item;
       return user;
     });
   }
 
   async findOne(id: string) {
-    const { password, ...user } = await this.userRepository.findOneBy({id});
+    const { password, ...user } = await this.userRepository.findOneBy({ id });
     return user;
   }
-
 
   remove(id: string) {
     return `This action removes a #${id} auth`;
   }
 
-  private isNotValid(password:string, encripted:string){
+  private isNotValid(password: string, encripted: string) {
     return !bcryptjs.compareSync(password, encripted);
   }
 
-  private getToken(user:User):string{
+  private getToken(user: User): string {
     return this.jwtService.sign({
-      id:user.id,
-      username:user.username,
-      name:user.name
+      id: user.id,
+      username: user.username,
+      name: user.name,
     });
   }
 }

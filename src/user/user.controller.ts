@@ -12,6 +12,7 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { AuthGuard } from './guards/auth/auth.guard';
 
 @Controller('user')
 export class UserController {
@@ -38,7 +39,7 @@ export class UserController {
     return this.userService.findOne(id);
   }
   
-  @UseGuards()
+  @UseGuards(AuthGuard)
   @Patch()
   update(@Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(updateUserDto);
