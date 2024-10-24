@@ -21,6 +21,36 @@ export class UserService {
     private jwtService: JwtService,
   ) {}
 
+  findAll() {
+    return this.userRepository.find({
+      where: {isActive: true},
+      select:{
+        name:true,
+        username:true,
+        email:true,
+        photo:true
+      },
+      relations:{
+        posts: true,
+      }
+    });
+  }
+
+  async findOne(username: string) {
+    // const { password, ...user } = await this.userRepository.findOneBy({username });
+    const { password, ...user } = await this.userRepository.findOne({
+      where: {username, isActive: true},
+      select:{
+        name: true,
+        username: true,
+        email: true,
+        photo: true
+      },
+      // relations:['posts']
+    });
+    return user;
+  }
+
   async create(createUserDto: CreateUserDto) {
     try {
       const { password, ...user } = createUserDto;
@@ -80,19 +110,6 @@ export class UserService {
       photo: user.photo,
       token: this.getToken(user),
     };
-  }
-
-  async findAll() {
-    const users = await this.userRepository.find();
-    return users.map((item) => {
-      const { password, ...user } = item;
-      return user;
-    });
-  }
-
-  async findOne(id: string) {
-    const { password, ...user } = await this.userRepository.findOneBy({ id });
-    return user;
   }
 
   remove(id: string) {

@@ -18,6 +18,16 @@ import { AuthGuard } from './guards/auth/auth.guard';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @Get()
+  findAll() {
+    return this.userService.findAll();
+  }
+
+  @Get(':username')
+  findOne(@Param('username') username: string) {
+    return this.userService.findOne(username);
+  }
+
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
@@ -26,17 +36,6 @@ export class UserController {
   @Post('login')
   login(@Body() loginUserDto: LoginUserDto) {
     return this.userService.login(loginUserDto);
-  }
-  
-
-  @Get()
-  findAll() {
-    return this.userService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(id);
   }
   
   @UseGuards(AuthGuard)
